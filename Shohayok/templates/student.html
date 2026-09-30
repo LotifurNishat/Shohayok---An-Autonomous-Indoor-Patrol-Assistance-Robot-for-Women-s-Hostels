@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>NIRAPOD Dashboard</title>
+    <style>body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }</style>
+</head>
+<body>
+    <h1>Student Dashboard</h1>
+    
+    <h3>Current Location: <span id="location" style="color: blue;">Loading...</span></h3>
+    
+    <div id="status-box" style="margin: 20px; padding: 15px; background: #eee; border-radius: 8px;">
+        <h4 id="hold-status">Robot is moving</h4>
+        <button id="cancel-btn" onclick="cancelStop()" style="display:none; padding: 10px; background: red; color: white;">Cancel Stop (Resume Patrol)</button>
+    </div>
+
+    <h3>Call Robot to Zone:</h3>
+    {% for zone in zones %}
+        <button onclick="callRobot('{{ zone }}')" style="padding: 10px; margin: 5px;">{{ zone }}</button>
+    {% endfor %}
+
+    <h3>Available Products on Board:</h3>
+    <ul id="product-list" style="list-style-type: none; padding: 0;"></ul>
+
+    <script>
+        function updateDashboard() {
+            fetch('/api/status')
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById('location').innerText = data.current_zone;
+                    
+                    const statusBox = document.getElementById('hold-status');
+                    const cancelBtn = document.getElementById('cancel-btn');
+                    
+                    if (data.is_holding) {
+                        statusBox.innerText = "Robot is stopped at destination (Max 5 mins)";
+                        cancelBtn.style.display = "inline-block";
+                    } else if (data.target_zone) {
+                        statusBox.innerText = `Heading to: ${data.target_zone}`;
+                        cancelBtn.style.display = "none";
+                    } else {
+                        statusBox.innerText = "Robot is on regular patrol";
+                        cancelBtn.style.display = "none";
+                    }
+
+                    const productList = document.getElementById('product-list');
+                    productList.innerHTML = "";
+                    data.products.forEach(p => {
+                        let li = document.createElement('li');
+                        li.innerText = "📦 " + p;
+                        productList.appendChild(li);
+                    });
+                });
+        }
+
+        function callRobot(zone) {
+            fetch('/api/call', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ zone: zone })
+            }).then(() => alert(`Robot called to ${zone}`));
+        }
+
+        function cancelStop() {
+            fetch('/api/cancel', { method: 'POST' });
+        }
+
+        // Poll the robot status every 2 seconds
+        setInterval(updateDashboard, 2000);
+    </script>
+</body>
+</html>

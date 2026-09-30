@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NIRAPOD — Security Console</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>body { font-family: 'Plus Jakarta Sans', sans-serif; }</style>
+</head>
+<body class="bg-black text-neutral-100 h-screen flex overflow-hidden">
+
+    <!-- Sidebar Navigation -->
+    <aside class="w-full md:w-64 bg-neutral-950 border-b md:border-b-0 md:border-r border-neutral-800 flex flex-col z-20 shrink-0">
+        <div class="p-5 border-b border-neutral-800 flex justify-between items-center md:block">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-black">
+                    <i data-lucide="shield" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <h1 class="text-base font-extrabold text-white leading-none">NIRAPOD</h1>
+                    <span class="text-[10px] text-neutral-400 font-bold uppercase tracking-widest">Security Desk</span>
+                </div>
+            </div>
+            <a href="/logout" class="md:hidden p-2 rounded-lg bg-neutral-900 text-neutral-300"><i data-lucide="log-out" class="w-4 h-4"></i></a>
+        </div>
+
+        <div class="p-3 md:p-4 flex-1 flex md:flex-col gap-2 overflow-x-auto md:overflow-y-auto">
+            <div class="hidden md:block text-[10px] font-bold text-neutral-500 uppercase tracking-widest mb-2 px-2">Navigation</div>
+
+            <button id="nav-camera" onclick="switchTab('camera')" class="nav-btn flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm border bg-white text-black border-white whitespace-nowrap">
+                <i data-lucide="video" class="w-4 h-4"></i> Live Surveillance
+            </button>
+
+            <button id="nav-threats" onclick="switchTab('threats')" class="nav-btn flex items-center justify-between px-4 py-3 rounded-xl hover:bg-neutral-900 text-neutral-400 hover:text-white transition-all font-medium text-sm border border-transparent whitespace-nowrap">
+                <span class="flex items-center gap-3"><i data-lucide="shield-alert" class="w-4 h-4"></i> Threat Terminal</span>
+                <span id="alert-badge" class="hidden w-2 h-2 rounded-full bg-white animate-pulse"></span>
+            </button>
+        </div>
+
+        <div class="hidden md:block p-6 border-t border-neutral-800 bg-neutral-950">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-9 h-9 rounded-full bg-neutral-900 flex items-center justify-center text-white border border-neutral-700">
+                    <i data-lucide="user" class="w-4 h-4"></i>
+                </div>
+                <div class="overflow-hidden">
+                    <div class="text-[10px] text-neutral-400 font-medium uppercase tracking-wider">Officer On Duty</div>
+                    <div class="text-sm font-bold text-white truncate">{{ user.name }}</div>
+                </div>
+            </div>
+            <a href="/logout" class="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-neutral-900 hover:bg-white hover:text-black text-neutral-300 transition-colors text-xs font-bold uppercase tracking-wider border border-neutral-800 hover:border-white">
+                <i data-lucide="log-out" class="w-3.5 h-3.5"></i> End Shift
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 flex flex-col h-full relative overflow-y-auto p-4 sm:p-8 bg-black">
+        <div class="max-w-5xl mx-auto w-full space-y-6">
+
+            <!-- Global Alarm Banner -->
+            <div id="alarm-banner" class="hidden p-4 rounded-2xl bg-white border border-white text-black flex items-center justify-between animate-bounce">
+                <div class="flex items-center gap-3 font-bold text-sm">
+                    <i data-lucide="volume-2" class="w-6 h-6 animate-pulse"></i>
+                    <span>WARNING ALARM ACTIVE — HOSTEL BUZZER TRIGGERED (10 SECONDS)</span>
+                </div>
+            </div>
+
+            <!-- TAB 1: SURVEILLANCE FEED -->
+            <div id="tab-camera" class="tab-content block animate-in fade-in duration-300">
+                <div class="bg-neutral-950 border border-neutral-800 rounded-3xl p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-sm font-bold uppercase tracking-widest text-neutral-400 flex items-center gap-2">
+                            <i data-lucide="camera" class="w-4 h-4 text-white"></i> Corridor Optical Stream
+                        </h2>
+                        <span id="privacy-indicator" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-neutral-900 border border-neutral-700 text-white text-[10px] uppercase font-bold tracking-wider">
+                            ● LIVE
+                        </span>
+                    </div>
+
+                    <div class="w-full aspect-video bg-black rounded-2xl border border-neutral-700 flex flex-col items-center justify-center text-neutral-500 relative overflow-hidden">
+                        <img id="videoStream" src="{{ url_for('video_feed') }}" class="w-full h-full object-cover absolute inset-0 z-10" alt="Camera Stream">
+                        <div class="absolute inset-0 border border-white/10 pointer-events-none grid grid-cols-3 grid-rows-3 z-20">
+                            <div class="border-b border-r border-white/10"></div><div class="border-b border-r border-white/10"></div><div class="border-b border-white/10"></div>
+                            <div class="border-b border-r border-white/10"></div><div class="border-b border-r border-white/10"></div><div class="border-b border-white/10"></div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 pt-4 border-t border-neutral-800 flex items-center justify-between text-[10px] font-bold uppercase tracking-widest text-neutral-500">
+                        <span>Engine: MobileNet-SSD</span>
+                        <span id="stream-note">Privacy Status: Unrestricted</span>
+                    </div>
+                </div>
+
+                <div class="mt-6">
+                    <button onclick="simHuman()" class="px-5 py-2.5 rounded-xl bg-neutral-900 hover:bg-white hover:text-black text-neutral-300 text-xs font-bold uppercase tracking-wider border border-neutral-800 transition-colors">
+                        Simulate Night Detection
+                    </button>
+                </div>
+            </div>
+
+            <!-- TAB 2: THREAT TERMINAL -->
+            <div id="tab-threats" class="tab-content hidden animate-in fade-in duration-300">
+                <div class="bg-neutral-950 border border-neutral-800 rounded-3xl p-6 sm:p-10 max-w-3xl mx-auto">
+                    <h2 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                        <i data-lucide="shield-alert" class="w-6 h-6 text-white"></i> Night Threat Verification
+                    </h2>
+
+                    <!-- Status Card -->
+                    <div id="alert-card" class="p-5 rounded-2xl bg-black border border-neutral-800 mb-6 transition-colors">
+                        <div class="flex items-center gap-4">
+                            <div id="status-icon" class="w-12 h-12 rounded-xl bg-neutral-900 flex items-center justify-center text-white border border-neutral-700">
+                                <i data-lucide="check" class="w-6 h-6"></i>
+                            </div>
+                            <div>
+                                <h4 id="alert-title" class="font-bold text-white text-base">Status: Normal Patrol</h4>
+                                <p id="alert-msg" class="text-neutral-400 text-sm mt-0.5">Corridor safe. No unauthorized presence.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Snapshot Preview -->
+                    <div id="snapshot-preview" class="hidden mb-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
+                        <span class="text-xs font-bold text-neutral-500 uppercase tracking-widest block mb-3">AI Captured Intruder Snapshot</span>
+                        <div class="aspect-video bg-black rounded-xl overflow-hidden border-2 border-white relative">
+                            <div class="absolute top-3 right-3 bg-white text-black text-[10px] font-bold px-3 py-1.5 rounded-lg z-10">AI CONFIRMED</div>
+                            <img id="capture-img" src="" alt="Intruder Snapshot" class="w-full h-full object-cover">
+                        </div>
+                    </div>
+
+                    <!-- Action Controls -->
+                    <div id="security-actions" class="hidden">
+                        <p class="text-sm text-neutral-300 font-medium mb-4">Verify visual identity in the snapshot above. Action required:</p>
+                        <div class="grid sm:grid-cols-2 gap-4">
+                            <button onclick="handleDecision('DISMISS')" class="py-4 px-6 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white font-bold text-sm transition-colors border border-neutral-700">
+                                Dismiss (Resident)
+                            </button>
+                            <button onclick="handleDecision('THREAT')" class="py-4 px-6 rounded-xl bg-white hover:bg-neutral-200 text-black border-2 border-white font-bold text-sm transition-all active:scale-[0.98]">
+                                Trigger 10s Warning Buzzer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        lucide.createIcons();
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.nav-btn').forEach(el => {
+                el.classList.remove('bg-white', 'text-black', 'border-white');
+                el.classList.add('text-neutral-400', 'border-transparent');
+            });
+            document.getElementById('tab-' + tabId).classList.remove('hidden');
+            const activeBtn = document.getElementById('nav-' + tabId);
+            activeBtn.classList.remove('text-neutral-400', 'border-transparent');
+            activeBtn.classList.add('bg-white', 'text-black', 'border-white');
+        }
+
+        async function fetchSecurityFeed() {
+            const res = await fetch('/api/status');
+            const data = await res.json();
+
+            const alertCard = document.getElementById('alert-card');
+            const actions = document.getElementById('security-actions');
+            const snapshot = document.getElementById('snapshot-preview');
+            const alarmBanner = document.getElementById('alarm-banner');
+            const statusIcon = document.getElementById('status-icon');
+            const privacyIndicator = document.getElementById('privacy-indicator');
+            const streamNote = document.getElementById('stream-note');
+            const alertBadge = document.getElementById('alert-badge');
+
+            if (data.privacy_mode) {
+                privacyIndicator.innerHTML = '<i data-lucide="lock" class="w-3 h-3"></i> PRIVACY LOCK';
+                privacyIndicator.className = "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-neutral-900 border border-neutral-700 text-white text-[10px] uppercase font-bold tracking-wider";
+                streamNote.innerText = "Privacy Status: Blocked by Admin";
+            } else {
+                privacyIndicator.innerText = "● LIVE";
+                privacyIndicator.className = "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white border border-white text-black text-[10px] uppercase font-bold tracking-wider";
+                streamNote.innerText = "Privacy Status: Full Live Access";
+            }
+
+            if (data.alarm_active) {
+                alarmBanner.classList.remove('hidden');
+            } else {
+                alarmBanner.classList.add('hidden');
+            }
+
+            if (data.security_alert) {
+                alertBadge.classList.remove('hidden'); 
+                alertCard.className = 'p-5 rounded-2xl bg-white text-black border border-white mb-6';
+                statusIcon.className = 'w-12 h-12 rounded-xl bg-black text-white flex items-center justify-center border border-neutral-700';
+                statusIcon.innerHTML = '<i data-lucide="alert-triangle" class="w-6 h-6"></i>';
+
+                document.getElementById('alert-title').innerText = 'HUMAN PRESENCE DETECTED';
+                document.getElementById('alert-title').className = 'font-bold text-black text-base';
+                
+                // Location formatting
+                const zone_info = data.alert_zone || 'Unknown Zone';
+                document.getElementById('alert-msg').innerText = `Location: ${zone_info} • Captured at: ${data.alert_timestamp}`;
+                document.getElementById('alert-msg').className = 'text-neutral-700 font-bold text-sm mt-0.5';
+
+                if (data.alert_image_url) {
+                    document.getElementById('capture-img').src = data.alert_image_url;
+                    snapshot.classList.remove('hidden');
+                }
+                actions.classList.remove('hidden');
+            } else {
+                alertBadge.classList.add('hidden'); 
+                alertCard.className = 'p-5 rounded-2xl bg-black border border-neutral-800 mb-6';
+                statusIcon.className = 'w-12 h-12 rounded-xl bg-neutral-900 flex items-center justify-center text-white border border-neutral-700';
+                statusIcon.innerHTML = '<i data-lucide="check" class="w-6 h-6"></i>';
+
+                document.getElementById('alert-title').innerText = 'Status: Normal Observation';
+                document.getElementById('alert-title').className = 'font-bold text-white text-base';
+                document.getElementById('alert-msg').innerText = 'Corridor safe. No unauthorized presence.';
+                document.getElementById('alert-msg').className = 'text-neutral-400 text-sm mt-0.5';
+                
+                snapshot.classList.add('hidden');
+                actions.classList.add('hidden');
+            }
+            lucide.createIcons();
+        }
+
+        async function handleDecision(action) {
+            const res = await fetch('/api/security/decision', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({action: action})
+            });
+            const data = await res.json();
+            alert(data.message);
+        }
+
+        async function simHuman() {
+            await fetch('/api/simulate/detect-human', {method: 'POST'});
+            switchTab('threats');
+        }
+
+        setInterval(fetchSecurityFeed, 1000);
+        fetchSecurityFeed();
+    </script>
+</body>
+</html>

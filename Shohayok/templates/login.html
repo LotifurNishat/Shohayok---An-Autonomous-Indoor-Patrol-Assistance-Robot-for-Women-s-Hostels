@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NIRAPOD — Portal Sign In</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    </style>
+</head>
+<body class="bg-black text-neutral-100 min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+    
+    <main class="w-full max-w-md relative z-10">
+        <div class="text-center mb-8">
+            <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-white text-black mb-4">
+                <i data-lucide="shield-check" class="w-8 h-8"></i>
+            </div>
+            <h1 class="text-3xl font-extrabold tracking-tight text-white">
+                NIRAPOD <span class="font-medium text-lg text-neutral-400 ml-1">নিরাপদ</span>
+            </h1>
+            <p class="text-neutral-400 text-sm mt-1">Autonomous Hostel Patrol & Assistance</p>
+        </div>
+
+        <div class="bg-neutral-950 border border-neutral-800 rounded-3xl p-8">
+            {% if error %}
+            <div class="mb-6 flex items-center gap-3 p-3.5 rounded-xl bg-white text-black text-sm font-bold">
+                <i data-lucide="alert-circle" class="w-5 h-5 flex-shrink-0"></i>
+                <span>{{ error }}</span>
+            </div>
+            {% endif %}
+
+            <form method="POST" action="/login" class="space-y-5">
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-neutral-400 mb-2">Username</label>
+                    <div class="relative">
+                        <i data-lucide="user" class="w-5 h-5 text-neutral-500 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+                        <input type="text" name="username" placeholder="resident1 / security1 / admin1" required
+                               class="w-full bg-black border border-neutral-700 rounded-xl pl-11 pr-4 py-3 text-sm text-white placeholder-neutral-600 focus:outline-none focus:border-white focus:ring-1 focus:ring-white transition-all">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-neutral-400 mb-2">Password</label>
+                    <div class="relative">
+                        <i data-lucide="lock" class="w-5 h-5 text-neutral-500 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+                        <input type="password" name="password" placeholder="••••••••" required
+                               class="w-full bg-black border border-neutral-700 rounded-xl pl-11 pr-4 py-3 text-sm text-white placeholder-neutral-600 focus:outline-none focus:border-white focus:ring-1 focus:ring-white transition-all">
+                    </div>
+                </div>
+
+                <button type="submit"
+                        class="w-full py-3.5 px-4 rounded-xl bg-white hover:bg-neutral-200 text-black font-bold text-sm transition-all active:scale-[0.98]">
+                    Sign In to Portal
+                </button>
+            </form>
+
+            <div class="mt-8 pt-6 border-t border-neutral-800">
+                <span class="text-xs font-semibold uppercase tracking-wider text-neutral-500 block mb-3">Demo Accounts (Pass: 123)</span>
+                <div class="grid grid-cols-3 gap-2 text-xs">
+                    <div class="bg-black border border-neutral-800 rounded-lg p-2 text-center text-neutral-400">
+                        <span class="block text-neutral-200 font-medium">Resident</span>
+                        <code class="text-[11px] text-white">resident1</code>
+                    </div>
+                    <div class="bg-black border border-neutral-800 rounded-lg p-2 text-center text-neutral-400">
+                        <span class="block text-neutral-200 font-medium">Security</span>
+                        <code class="text-[11px] text-white">security1</code>
+                    </div>
+                    <div class="bg-black border border-neutral-800 rounded-lg p-2 text-center text-neutral-400">
+                        <span class="block text-neutral-200 font-medium">Admin</span>
+                        <code class="text-[11px] text-white">admin1</code>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>lucide.createIcons();</script>
+</body>
+</html>
